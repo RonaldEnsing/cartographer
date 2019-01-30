@@ -86,21 +86,23 @@ std::unique_ptr<transform::Rigid2d> LocalTrajectoryBuilder2D::ScanMatch(
   }
 
   auto pose_observation = common::make_unique<transform::Rigid2d>();
-  ceres::Solver::Summary summary;
-  ceres_scan_matcher_.Match(pose_prediction.translation(), initial_ceres_pose,
-                            filtered_gravity_aligned_point_cloud,
-                            *matching_submap->grid(), pose_observation.get(),
-                            &summary);
-  if (pose_observation) {
-    kCeresScanMatcherCostMetric->Observe(summary.final_cost);
-    double residual_distance =
-        (pose_observation->translation() - pose_prediction.translation())
-            .norm();
-    kScanMatcherResidualDistanceMetric->Observe(residual_distance);
-    double residual_angle = std::abs(pose_observation->rotation().angle() -
-                                     pose_prediction.rotation().angle());
-    kScanMatcherResidualAngleMetric->Observe(residual_angle);
-  }
+  *pose_observation = pose_prediction;
+//  std::cout << "pose observation " << *pose_observation << std::endl;
+//  ceres::Solver::Summary summary;
+//  ceres_scan_matcher_.Match(pose_prediction.translation(), initial_ceres_pose,
+//                            filtered_gravity_aligned_point_cloud,
+//                            *matching_submap->grid(), pose_observation.get(),
+//                            &summary);
+//  if (pose_observation) {
+//    kCeresScanMatcherCostMetric->Observe(summary.final_cost);
+//    double residual_distance =
+//        (pose_observation->translation() - pose_prediction.translation())
+//            .norm();
+//    kScanMatcherResidualDistanceMetric->Observe(residual_distance);
+//    double residual_angle = std::abs(pose_observation->rotation().angle() -
+//                                     pose_prediction.rotation().angle());
+//    kScanMatcherResidualAngleMetric->Observe(residual_angle);
+//  }
   return pose_observation;
 }
 
@@ -284,8 +286,8 @@ LocalTrajectoryBuilder2D::InsertIntoSubmap(
 
 void LocalTrajectoryBuilder2D::AddImuData(const sensor::ImuData& imu_data) {
   CHECK(options_.use_imu_data()) << "An unexpected IMU packet was added.";
-  InitializeExtrapolator(imu_data.time);
-  extrapolator_->AddImuData(imu_data);
+//  InitializeExtrapolator(imu_data.time);
+//  extrapolator_->AddImuData(imu_data);
 }
 
 void LocalTrajectoryBuilder2D::AddOdometryData(
@@ -295,6 +297,7 @@ void LocalTrajectoryBuilder2D::AddOdometryData(
     LOG(INFO) << "Extrapolator not yet initialized.";
     return;
   }
+  //std::cout << "odometry data: " << odometry_data.time << " " << odometry_data.pose << std::endl;
   extrapolator_->AddOdometryData(odometry_data);
 }
 
